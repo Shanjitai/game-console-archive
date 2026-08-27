@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📚 经典杂志封面档案馆</title>
+  
+  <!-- 1. 引入 Bootstrap CSS (用于网格和导航) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- 2. 引入 Vue 3 (用于所有指令) -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    /* ★★★ 所有 CSS 加分项（Flex, Grid, 伪类, z-index, 过渡, 变换）都写在这里 ★★★ */
+    
+    /* 让导航栏粘在顶部 */
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 999; /* 使用 z-index */
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* ★ 使用 Grid 布局（展示杂志卡片） */
+    .magazine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 25px;
+    }
+
+    /* ★ 使用 Flexbox（让卡片内部内容居中） */
+    .magazine-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 15px;
+      transition: all 0.3s ease; /* ★ 过渡效果 */
+      cursor: pointer;
+    }
+
+    /* ★ 伪类 :hover 和 变换效果（transform） */
+    .magazine-card:hover {
+      transform: translateY(-10px) scale(1.02); /* ★ 变换效果 */
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+      background: white;
+    }
+
+    /* 汉堡菜单在小屏显示，大屏隐藏（配合Bootstrap） */
+    @media (max-width: 768px) {
+      .desktop-menu {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ★★★ 所有 Vue 控制的区域，必须包在 id="app" 里 ★★★ -->
+<div id="app">
+
+  <!-- ========== 第1部分：粘性导航栏（含汉堡菜单） ========== -->
+  <nav class="sticky-nav navbar navbar-expand-md navbar-light">
+    <div class="container">
+      <a class="navbar-brand" href="#">📖 杂志档案馆</a>
+      
+      <!-- 汉堡菜单按钮（小屏显示） -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- 导航链接 -->
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#hero">首页</a></li>
+          <li class="nav-item"><a class="nav-link" href="#gallery">馆藏</a></li>
+          <li class="nav-item"><a class="nav-link" href="#accordion">杂志史</a></li>
+          <li class="nav-item"><a class="nav-link" href="#forms">订阅</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== 第2部分：Hero 区域（2分） ========== -->
+  <section id="hero" class="bg-dark text-white text-center py-5">
+    <div class="container">
+      <h1 class="display-3">百年经典杂志封面</h1>
+      <p class="lead">见证 20 世纪视觉文化的变迁</p>
+      <!-- 这里可以放一张大图，也可以放一个简单的轮播，但为了不重复（后面有独立轮播），这里放一张背景图即可 -->
+      <img src="https://picsum.photos/800/300?random=1" class="img-fluid rounded" alt="Hero Image">
+    </div>
+  </section>
+
+  <!-- ========== 第3部分：搜索 + 杂志卡片网格（Flex+Grid+搜索） ========== -->
+  <section id="gallery" class="container my-5">
+    <h2 class="mb-3">📚 杂志馆藏</h2>
+    
+    <!-- 搜索框（v-model 绑定） -->
+    <input type="text" class="form-control mb-4 w-50" placeholder="🔍 搜索杂志名称或年份..." v-model="searchQuery">
+
+    <!-- 使用 Grid 布局的卡片列表（v-for 循环） -->
+    <div class="magazine-grid">
+      <div class="magazine-card" v-for="item in filteredMagazines" :key="item.id">
+        <img :src="item.image" class="img-fluid rounded" alt="封面" style="height:200px; width:100%; object-fit:cover;">
+        <h5 class="mt-2">{{ item.name }}</h5>
+        <p class="text-muted small">{{ item.year }} · {{ item.country }}</p>
+        <!-- v-bind 绑定动态 class，v-show 控制是否显示标签 -->
+        <span class="badge bg-primary" v-show="item.isClassic">经典</span>
+      </div>
+    </div>
+    <!-- v-if 和 v-else-if 用于空状态提示 -->
+    <p v-if="filteredMagazines.length === 0" class="text-center text-danger">没有找到匹配的杂志。</p>
+    <p v-else-if="filteredMagazines.length < 3" class="text-center text-warning">找到的杂志较少，试试其他关键词。</p>
+  </section>
+
+  <!-- ========== 第4部分：独立轮播（Carousel 4分） ========== -->
+  <section class="container my-5">
+    <h2>🖼️ 封面精选轮播</h2>
+    <div class="position-relative bg-light p-3 rounded" 
+         @mouseenter="pauseCarousel" 
+         @mouseleave="startCarousel">
+      <!-- 轮播图片 -->
+      <img :src="carouselImages[carouselIndex]" class="img-fluid w-100 rounded" style="height: 400px; object-fit: cover;">
+      
+      <!-- 左右手动切换按钮 -->
+      <button class="btn btn-dark position-absolute top-50 start-0 translate-middle-y" @click="prevSlide">❮</button>
+      <button class="btn btn-dark position-absolute top-50 end-0 translate-middle-y" @click="nextSlide">❯</button>
+      
+      <!-- 底部指示小圆点 -->
+      <div class="text-center mt-2">
+        <span v-for="(img, idx) in carouselImages" :key="idx" 
+              class="badge rounded-pill mx-1" 
+              :class="idx === carouselIndex ? 'bg-primary' : 'bg-secondary'"
+              style="width:15px; height:15px; display:inline-block; cursor:pointer;"
+              @click="carouselIndex = idx">
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 第5部分：手风琴 Accordion（至少5项 4分） ========== -->
+  <section id="accordion" class="container my-5">
+    <h2>📜 杂志历史小百科</h2>
+    <div v-for="(item, idx) in accordionItems" :key="idx" class="border rounded mb-2">
+      <div class="p-3 fw-bold" style="cursor:pointer; background:#f1f1f1;" 
+           @click="toggleAccordion(idx)">
+        {{ item.title }}
+        <span class="float-end">{{ activeAccordion === idx ? '▲' : '▼' }}</span>
+      </div>
+      <!-- v-show 控制展开/收起 -->
+      <div class="p-3" v-show="activeAccordion === idx">
+        {{ item.content }}
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 第6部分：两个表单（4分，含实时验证） ========== -->
+  <section id="forms" class="container my-5">
+    <h2>📩 联系我们 & 订阅</h2>
+    <div class="row">
+      <!-- 表单1：咨询表 -->
+      <div class="col-md-6">
+        <h5>咨询表单</h5>
+        <form @submit.prevent="submitForm1">
+          <div class="mb-2">
+            <input class="form-control" placeholder="姓名" v-model="form1.name" @input="validateForm1('name')">
+            <small class="text-danger" v-show="errors1.name">{{ errors1.name }}</small>
+          </div>
+          <div class="mb-2">
+            <input class="form-control" placeholder="邮箱" v-model="form1.email" @input="validateForm1('email')">
+            <small class="text-danger" v-show="errors1.email">{{ errors1.email }}</small>
+          </div>
+          <button class="btn btn-primary" type="submit">发送咨询</button>
+        </form>
+      </div>
+      <!-- 表单2：订阅表 -->
+      <div class="col-md-6">
+        <h5>订阅简报</h5>
+        <form @submit.prevent="submitForm2">
+          <div class="mb-2">
+            <input class="form-control" placeholder="邮箱" v-model="form2.email" @input="validateForm2('email')">
+            <small class="text-danger" v-show="errors2.email">{{ errors2.email }}</small>
+          </div>
+          <div class="mb-2">
+            <input class="form-control" placeholder="感兴趣的杂志" v-model="form2.interest" @input="validateForm2('interest')">
+            <small class="text-danger" v-show="errors2.interest">{{ errors2.interest }}</small>
+          </div>
+          <button class="btn btn-success" type="submit">订阅</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</div> <!-- 结束 id="app" -->
+
+<!-- ★★★ 引入 Bootstrap JS（让汉堡菜单能点击展开） ★★★ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ★★★ 所有 Vue 逻辑（数据、方法、计算属性）都写在这里 ★★★ -->
+<script>
+const { createApp, ref, computed, watch } = Vue;
+
+const app = createApp({
+  setup() {
+    // ===== 1. 搜索数据（用于 v-for 和搜索） =====
+    const magazines = ref([
+      { id: 1, name: 'Life 杂志', year: 1936, country: '美国', image: 'https://picsum.photos/200/300?random=10', isClassic: true },
+      { id: 2, name: 'Vogue', year: 1892, country: '美国', image: 'https://picsum.photos/200/300?random=20', isClassic: false },
+      { id: 3, name: 'National Geographic', year: 1888, country: '美国', image: 'https://picsum.photos/200/300?random=30', isClassic: true },
+      { id: 4, name: 'Paris Match', year: 1949, country: '法国', image: 'https://picsum.photos/200/300?random=40', isClassic: false },
+      { id: 5, name: 'Der Spiegel', year: 1947, country: '德国', image: 'https://picsum.photos/200/300?random=50', isClassic: false },
+      { id: 6, name: 'Time 时代', year: 1923, country: '美国', image: 'https://picsum.photos/200/300?random=60', isClassic: true }
+    ]);
+    const searchQuery = ref('');
+
+    // 计算属性：搜索过滤（实时更新）
+    const filteredMagazines = computed(() => {
+      if (!searchQuery.value) return magazines.value;
+      return magazines.value.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        item.year.toString().includes(searchQuery.value)
+      );
+    });
+
+    // ===== 2. 轮播数据（自动 + 手动） =====
+    const carouselImages = ref([
+      'https://picsum.photos/800/400?random=100',
+      'https://picsum.photos/800/400?random=200',
+      'https://picsum.photos/800/400?random=300',
+      'https://picsum.photos/800/400?random=400'
+    ]);
+    const carouselIndex = ref(0);
+    let timer = null;
+
+    const nextSlide = () => {
+      carouselIndex.value = (carouselIndex.value + 1) % carouselImages.value.length;
+    };
+    const prevSlide = () => {
+      carouselIndex.value = (carouselIndex.value - 1 + carouselImages.value.length) % carouselImages.value.length;
+    };
+    const startCarousel = () => {
+      if (timer) clearInterval(timer);
+      timer = setInterval(nextSlide, 2000); // 2秒自动切换
+    };
+    const pauseCarousel = () => {
+      if (timer) clearInterval(timer);
+      timer = null;
+    };
+    // 页面加载后自动播放
+    setTimeout(startCarousel, 100);
+
+    // ===== 3. 手风琴数据（至少5项） =====
+    const accordionItems = ref([
+      { title: '📘 世界上第一本杂志', content: '1663年德国出版的《Erbauliche Monaths-Unterredungen》被认为是世界上第一本杂志。' },
+      { title: '📗 《Life》的黄金时代', content: '1936年创刊，以摄影报道闻名，巅峰时期发行量超过800万册。' },
+      { title: '📕 《Vogue》的时尚革命', content: '1892年创刊，从社会周刊转变为全球时尚圣经。' },
+      { title: '📙 《国家地理》的黄色边框', content: '1888年创刊，1889年开始使用标志性的黄色边框封面。' },
+      { title: '📓 杂志与战争宣传', content: '一战和二战期间，杂志成为各国重要的宣传工具，影响公众舆论。' },
+      { title: '📔 数字时代的杂志', content: '21世纪，纸质杂志面临挑战，纷纷转型数字订阅和社交媒体内容。' }
+    ]);
+    const activeAccordion = ref(0); // 默认展开第一个
+
+    const toggleAccordion = (idx) => {
+      if (activeAccordion.value === idx) {
+        activeAccordion.value = null; // 点击已展开的则收起
+      } else {
+        activeAccordion.value = idx;
+      }
+    };
+
+    // ===== 4. 表单1（咨询）实时验证 =====
+    const form1 = ref({ name: '', email: '' });
+    const errors1 = ref({ name: '', email: '' });
+
+    const validateForm1 = (field) => {
+      if (field === 'name') {
+        errors1.value.name = form1.value.name.length < 2 ? '姓名至少2个字符' : '';
+      }
+      if (field === 'email') {
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form1.value.email);
+        errors1.value.email = valid ? '' : '请输入有效的邮箱地址';
+      }
+    };
+    const submitForm1 = () => {
+      validateForm1('name');
+      validateForm1('email');
+      if (!errors1.value.name && !errors1.value.email) {
+        alert('✅ 咨询发送成功！');
+      } else {
+        alert('❌ 请修正红色错误再提交。');
+      }
+    };
+
+    // ===== 5. 表单2（订阅）实时验证 =====
+    const form2 = ref({ email: '', interest: '' });
+    const errors2 = ref({ email: '', interest: '' });
+
+    const validateForm2 = (field) => {
+      if (field === 'email') {
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form2.value.email);
+        errors2.value.email = valid ? '' : '请输入有效的邮箱地址';
+      }
+      if (field === 'interest') {
+        errors2.value.interest = form2.value.interest.length < 1 ? '请输入感兴趣的杂志' : '';
+      }
+    };
+    const submitForm2 = () => {
+      validateForm2('email');
+      validateForm2('interest');
+      if (!errors2.value.email && !errors2.value.interest) {
+        alert('✅ 订阅成功！');
+      } else {
+        alert('❌ 请修正红色错误再提交。');
+      }
+    };
+
+    // ===== 返回所有数据给模板使用 =====
+    return {
+      magazines,
+      searchQuery,
+      filteredMagazines,
+      carouselImages,
+      carouselIndex,
+      nextSlide,
+      prevSlide,
+      startCarousel,
+      pauseCarousel,
+      accordionItems,
+      activeAccordion,
+      toggleAccordion,
+      form1,
+      errors1,
+      validateForm1,
+      submitForm1,
+      form2,
+      errors2,
+      validateForm2,
+      submitForm2
+    };
+  }
+});
+
+app.mount('#app');
+</script>
+
+</body>
+</html>
