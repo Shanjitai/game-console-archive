@@ -1,101 +1,108 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎮 经典游戏机档案馆</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Console Archive</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- Vue 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <style>
-    /* ---- 粘性导航 ---- */
+    /* Sticky Nav */
     .sticky-nav {
       position: sticky;
       top: 0;
       z-index: 999;
       background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     }
-    /* ---- 卡片网格 (Grid) ---- */
+    /* Grid layout for cards */
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 24px;
     }
-    /* ---- 卡片样式 (Flex) ---- */
-    .card-item {
+    /* Card style with Flex, Transition, Transform, Pseudo-class */
+    .console-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       background: #f8f9fa;
-      border-radius: 12px;
-      padding: 15px;
-      transition: all 0.3s ease;   /* 过渡 */
+      border-radius: 16px;
+      padding: 16px;
+      transition: all 0.3s ease;
       cursor: default;
+      border: 1px solid transparent;
     }
-    .card-item:hover {
-      transform: translateY(-8px) scale(1.02);  /* 变换 */
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      background: white;
+    .console-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      background: #ffffff;
+      border-color: #dee2e6;
     }
-    /* ---- 轮播容器 ---- */
-    .carousel-container {
-      position: relative;
-      background: #eee;
-      border-radius: 12px;
-      padding: 10px;
-    }
-    .carousel-container img {
+    .console-card img {
       width: 100%;
-      height: 350px;
+      height: 170px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
+    }
+    /* Carousel */
+    .carousel-box {
+      position: relative;
+      background: #e9ecef;
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .carousel-box img {
+      width: 100%;
+      height: 370px;
+      object-fit: cover;
+      border-radius: 10px;
     }
     .carousel-btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0,0,0,0.5);
-      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
       border: none;
-      padding: 10px 16px;
+      padding: 10px 18px;
       border-radius: 50%;
-      font-size: 24px;
-      cursor: pointer;
+      font-size: 26px;
+      font-weight: bold;
       transition: 0.2s;
     }
     .carousel-btn:hover {
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.8);
     }
-    .carousel-btn.left { left: 10px; }
-    .carousel-btn.right { right: 10px; }
-    /* ---- 手风琴 ---- */
-    .accordion-item {
-      border: 1px solid #ddd;
-      border-radius: 6px;
+    .carousel-btn.left { left: 12px; }
+    .carousel-btn.right { right: 12px; }
+    /* Accordion */
+    .acc-item {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
       margin-bottom: 8px;
+      overflow: hidden;
     }
-    .accordion-header {
-      background: #f1f1f1;
-      padding: 12px 18px;
+    .acc-header {
+      background: #f1f3f5;
+      padding: 14px 20px;
       cursor: pointer;
-      font-weight: bold;
-      border-radius: 6px 6px 0 0;
+      font-weight: 600;
       user-select: none;
+      transition: 0.2s;
     }
-    .accordion-header:hover {
-      background: #e9e9e9;
+    .acc-header:hover {
+      background: #e9ecef;
     }
-    .accordion-body {
-      padding: 12px 18px;
-      background: white;
-      border-radius: 0 0 6px 6px;
+    .acc-body {
+      padding: 14px 20px;
+      background: #fff;
     }
-    /* ---- 错误提示 ---- */
-    .error-msg {
+    .error-tip {
       color: #dc3545;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
   </style>
 </head>
@@ -103,124 +110,126 @@
 
 <div id="app">
 
-  <!-- ====== 导航 ====== -->
+  <!-- ===== NAVBAR (sticky + hamburger) ===== -->
   <nav class="sticky-nav navbar navbar-expand-md navbar-light">
     <div class="container">
-      <a class="navbar-brand" href="#">🎮 游戏机档案馆</a>
+      <a class="navbar-brand fw-bold" href="#">🎮 Console Archive</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="#hero">首页</a></li>
-          <li class="nav-item"><a class="nav-link" href="#gallery">机型</a></li>
-          <li class="nav-item"><a class="nav-link" href="#history">历史</a></li>
-          <li class="nav-item"><a class="nav-link" href="#forms">联系</a></li>
+          <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#gallery">Consoles</a></li>
+          <li class="nav-item"><a class="nav-link" href="#history">History</a></li>
+          <li class="nav-item"><a class="nav-link" href="#forms">Contact</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- ====== Hero ====== -->
+  <!-- ===== HERO ===== -->
   <section id="hero" class="bg-dark text-white text-center py-5">
     <div class="container">
-      <h1 class="display-4">🎮 经典游戏机</h1>
-      <p class="lead">重温那些改变世界的游戏硬件</p>
-      <img src="https://picsum.photos/800/300?random=1" class="img-fluid rounded" alt="Hero">
+      <h1 class="display-4 fw-bold">🎮 Classic Game Consoles</h1>
+      <p class="lead mb-4">Relive the hardware that changed the world.</p>
+      <img src="https://picsum.photos/seed/hero/900/300" class="img-fluid rounded shadow" alt="Hero Image">
     </div>
   </section>
 
-  <!-- ====== 搜索 + 卡片网格 ====== -->
+  <!-- ===== SEARCH + GRID CARDS ===== -->
   <section id="gallery" class="container my-5">
-    <h2>🕹️ 经典机型</h2>
-    <input type="text" class="form-control mb-4 w-50" placeholder="🔍 搜索名称或年份..." v-model="keyword">
+    <h2 class="mb-3">🕹️ Classic Models</h2>
+    <input type="text" class="form-control mb-4 w-50" placeholder="🔍 Search by name or year..." v-model="keyword">
 
     <div class="card-grid">
-      <div class="card-item" v-for="item in filteredList" :key="item.id">
-        <img :src="item.image" class="img-fluid rounded" style="height:180px; width:100%; object-fit:cover;" alt="封面">
-        <h5 class="mt-2">{{ item.name }}</h5>
+      <div class="console-card" v-for="item in filteredList" :key="item.id">
+        <img :src="item.image" alt="console">
+        <h5 class="mt-2 text-center">{{ item.name }}</h5>
         <p class="text-muted small">{{ item.year }} · {{ item.country }}</p>
-        <span class="badge bg-primary" v-show="item.famous">经典</span>
+        <span class="badge bg-warning text-dark" v-show="item.famous">⭐ Classic</span>
       </div>
     </div>
-    <!-- 空状态 -->
-    <p v-if="filteredList.length === 0" class="text-center text-danger mt-3">没有找到匹配的机型。</p>
-    <p v-else-if="filteredList.length < 3" class="text-center text-warning mt-3">结果较少，换个关键词试试。</p>
+
+    <p v-if="filteredList.length === 0" class="text-center text-danger mt-4">No matching consoles found.</p>
+    <p v-else-if="filteredList.length < 3" class="text-center text-warning mt-4">Too few results, try another keyword.</p>
   </section>
 
-  <!-- ====== 轮播（独立） ====== -->
+  <!-- ===== CAROUSEL (standalone, auto + manual + hover pause) ===== -->
   <section class="container my-5">
-    <h2>🎞️ 经典机型轮播</h2>
-    <div class="carousel-container"
-         @mouseenter="pauseSlide"
-         @mouseleave="startSlide">
-      <img :src="slides[slideIndex]" alt="轮播图">
+    <h2 class="mb-3">🎞️ Classic Models Carousel</h2>
+    <div class="carousel-box" @mouseenter="pauseSlide" @mouseleave="startSlide">
+      <img :src="slides[slideIndex]" alt="Carousel slide">
       <button class="carousel-btn left" @click="prevSlide">‹</button>
       <button class="carousel-btn right" @click="nextSlide">›</button>
-      <div class="text-center mt-2">
+      <div class="text-center mt-3">
         <span v-for="(_, idx) in slides" :key="idx"
               class="badge rounded-pill mx-1"
               :class="idx === slideIndex ? 'bg-primary' : 'bg-secondary'"
-              style="width:14px; height:14px; display:inline-block; cursor:pointer;"
+              style="width: 16px; height: 16px; display: inline-block; cursor: pointer;"
               @click="slideIndex = idx"></span>
       </div>
     </div>
   </section>
 
-  <!-- ====== 手风琴（至少5项） ====== -->
+  <!-- ===== ACCORDION (at least 5 items) ===== -->
   <section id="history" class="container my-5">
-    <h2>📖 游戏机编年史</h2>
-    <div v-for="(item, idx) in accordionData" :key="idx" class="accordion-item">
-      <div class="accordion-header" @click="toggleAccordion(idx)">
+    <h2 class="mb-3">📖 Chronicle of Consoles</h2>
+    <div v-for="(item, idx) in accordionData" :key="idx" class="acc-item">
+      <div class="acc-header" @click="toggleAccordion(idx)">
         {{ item.title }}
         <span class="float-end">{{ activeIdx === idx ? '▲' : '▼' }}</span>
       </div>
-      <div class="accordion-body" v-show="activeIdx === idx">
+      <div class="acc-body" v-show="activeIdx === idx">
         {{ item.content }}
       </div>
     </div>
   </section>
 
-  <!-- ====== 两个表单（实时验证 + watch） ====== -->
+  <!-- ===== TWO FORMS (real-time validation with watch) ===== -->
   <section id="forms" class="container my-5">
-    <h2>📩 反馈 & 订阅</h2>
-    <div class="row">
-      <!-- 表单1：反馈 -->
+    <h2 class="mb-3">📩 Feedback & Subscribe</h2>
+    <div class="row g-4">
+      <!-- Form 1: Feedback -->
       <div class="col-md-6">
-        <h5>✉️ 意见反馈</h5>
-        <form @submit.prevent="submitFeedback">
-          <div class="mb-2">
-            <input class="form-control" placeholder="姓名" v-model="feedback.name">
-            <div class="error-msg" v-show="feedbackErrors.name">{{ feedbackErrors.name }}</div>
-          </div>
-          <div class="mb-2">
-            <input class="form-control" placeholder="邮箱" v-model="feedback.email">
-            <div class="error-msg" v-show="feedbackErrors.email">{{ feedbackErrors.email }}</div>
-          </div>
-          <button class="btn btn-primary" type="submit">发送</button>
-        </form>
+        <div class="card p-3">
+          <h5>✉️ Feedback</h5>
+          <form @submit.prevent="submitFeedback">
+            <div class="mb-2">
+              <input class="form-control" placeholder="Your Name" v-model="feedback.name" />
+              <div class="error-tip" v-show="feedbackErrors.name">{{ feedbackErrors.name }}</div>
+            </div>
+            <div class="mb-2">
+              <input class="form-control" placeholder="Email Address" v-model="feedback.email" />
+              <div class="error-tip" v-show="feedbackErrors.email">{{ feedbackErrors.email }}</div>
+            </div>
+            <button class="btn btn-primary" type="submit">Send</button>
+          </form>
+        </div>
       </div>
-      <!-- 表单2：订阅 -->
+      <!-- Form 2: Subscribe -->
       <div class="col-md-6">
-        <h5>📬 订阅资讯</h5>
-        <form @submit.prevent="subscribe">
-          <div class="mb-2">
-            <input class="form-control" placeholder="邮箱" v-model="subscribeForm.email">
-            <div class="error-msg" v-show="subErrors.email">{{ subErrors.email }}</div>
-          </div>
-          <div class="mb-2">
-            <input class="form-control" placeholder="感兴趣的机型" v-model="subscribeForm.interest">
-            <div class="error-msg" v-show="subErrors.interest">{{ subErrors.interest }}</div>
-          </div>
-          <button class="btn btn-success" type="submit">订阅</button>
-        </form>
+        <div class="card p-3">
+          <h5>📬 Newsletter</h5>
+          <form @submit.prevent="submitSubscribe">
+            <div class="mb-2">
+              <input class="form-control" placeholder="Email Address" v-model="subscribe.email" />
+              <div class="error-tip" v-show="subErrors.email">{{ subErrors.email }}</div>
+            </div>
+            <div class="mb-2">
+              <input class="form-control" placeholder="Interested Console" v-model="subscribe.interest" />
+              <div class="error-tip" v-show="subErrors.interest">{{ subErrors.interest }}</div>
+            </div>
+            <button class="btn btn-success" type="submit">Subscribe</button>
+          </form>
+        </div>
       </div>
     </div>
   </section>
 
 </div>
 
-<!-- Bootstrap JS (for hamburger) -->
+<!-- Bootstrap JS for toggling hamburger -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -228,19 +237,17 @@ const { createApp, ref, computed, watch } = Vue;
 
 const app = createApp({
   setup() {
-    // ---------- 数据 ----------
-    // 机型列表
+    // ----- DATA (Consoles) -----
     const consoles = ref([
-      { id: 1, name: '红白机 (FC)', year: 1983, country: '日本', image: 'https://picsum.photos/200/300?random=10', famous: true },
-      { id: 2, name: '超级任天堂', year: 1990, country: '日本', image: 'https://picsum.photos/200/300?random=20', famous: true },
-      { id: 3, name: 'PlayStation', year: 1994, country: '日本', image: 'https://picsum.photos/200/300?random=30', famous: false },
-      { id: 4, name: 'Nintendo 64', year: 1996, country: '日本', image: 'https://picsum.photos/200/300?random=40', famous: false },
-      { id: 5, name: 'Dreamcast', year: 1998, country: '日本', image: 'https://picsum.photos/200/300?random=50', famous: false },
-      { id: 6, name: 'Xbox', year: 2001, country: '美国', image: 'https://picsum.photos/200/300?random=60', famous: true }
+      { id: 1, name: 'Nintendo Famicom', year: 1983, country: 'Japan', image: 'https://picsum.photos/seed/c1/200/300', famous: true },
+      { id: 2, name: 'Super Nintendo', year: 1990, country: 'Japan', image: 'https://picsum.photos/seed/c2/200/300', famous: true },
+      { id: 3, name: 'PlayStation', year: 1994, country: 'Japan', image: 'https://picsum.photos/seed/c3/200/300', famous: false },
+      { id: 4, name: 'Nintendo 64', year: 1996, country: 'Japan', image: 'https://picsum.photos/seed/c4/200/300', famous: false },
+      { id: 5, name: 'Dreamcast', year: 1998, country: 'Japan', image: 'https://picsum.photos/seed/c5/200/300', famous: false },
+      { id: 6, name: 'Xbox Classic', year: 2001, country: 'USA', image: 'https://picsum.photos/seed/c6/200/300', famous: true }
     ]);
     const keyword = ref('');
 
-    // 搜索过滤
     const filteredList = computed(() => {
       if (!keyword.value) return consoles.value;
       const q = keyword.value.toLowerCase();
@@ -250,12 +257,12 @@ const app = createApp({
       );
     });
 
-    // ---------- 轮播 ----------
+    // ----- CAROUSEL (setTimeout recursion) -----
     const slides = ref([
-      'https://picsum.photos/800/400?random=100',
-      'https://picsum.photos/800/400?random=200',
-      'https://picsum.photos/800/400?random=300',
-      'https://picsum.photos/800/400?random=400'
+      'https://picsum.photos/seed/s1/800/400',
+      'https://picsum.photos/seed/s2/800/400',
+      'https://picsum.photos/seed/s3/800/400',
+      'https://picsum.photos/seed/s4/800/400'
     ]);
     const slideIndex = ref(0);
     let timer = null;
@@ -280,17 +287,16 @@ const app = createApp({
         timer = null;
       }
     };
-    // 自动开始
-    startSlide();
+    startSlide(); // Auto start
 
-    // ---------- 手风琴 ----------
+    // ----- ACCORDION (6 items) -----
     const accordionData = ref([
-      { title: '🕹️ 第一代家用机', content: '1972年，Magnavox Odyssey开启家用机时代。' },
-      { title: '🎮 任天堂的崛起', content: '1983年FC红白机拯救了北美游戏市场。' },
-      { title: '⚡ 16位时代', content: '世嘉MD与任天堂SFC的激烈竞争。' },
-      { title: '💿 索尼入场', content: '1994年PlayStation利用CD-ROM打破垄断。' },
-      { title: '🌐 微软参战', content: '2001年Xbox以强大硬件进入市场。' },
-      { title: '📱 掌机与未来', content: '从Game Boy到云游戏，形态不断演变。' }
+      { title: '🕹️ First Home Console', content: 'In 1972, Magnavox Odyssey kicked off the home console era. But it was Atari 2600 (1977) that made it popular worldwide.' },
+      { title: '🎮 Nintendo\'s Revolution', content: 'The Famicom (NES) launched in 1983. With Super Mario Bros., it revived the North American gaming market after the 1983 crash.' },
+      { title: '⚡ The 16-bit War', content: 'Sega Genesis vs. Super Nintendo in the early 1990s. SNES won the sales battle with iconic RPGs and platformers.' },
+      { title: '💿 Sony Enters', content: 'Sony released PlayStation in 1994. Using CD-ROM technology, it attracted many third-party developers and broke Nintendo\'s grip.' },
+      { title: '🌐 Microsoft Joins', content: 'Microsoft launched the Xbox in 2001, featuring a powerful PC-like architecture and built-in hard drive.' },
+      { title: '📱 Handheld & Future', content: 'From Game Boy to Switch, and now cloud gaming. The way we play is constantly evolving.' }
     ]);
     const activeIdx = ref(0);
 
@@ -298,49 +304,47 @@ const app = createApp({
       activeIdx.value = (activeIdx.value === idx) ? null : idx;
     };
 
-    // ---------- 表单（用watch验证） ----------
-    // 表单1：反馈
+    // ----- FORM 1: Feedback (with watch) -----
     const feedback = ref({ name: '', email: '' });
     const feedbackErrors = ref({ name: '', email: '' });
 
     watch(() => feedback.value.name, (val) => {
-      feedbackErrors.value.name = val.length < 2 ? '姓名至少2个字符' : '';
+      feedbackErrors.value.name = val.length < 2 ? 'Name must be at least 2 characters.' : '';
     });
     watch(() => feedback.value.email, (val) => {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      feedbackErrors.value.email = re.test(val) ? '' : '请输入有效邮箱';
+      feedbackErrors.value.email = re.test(val) ? '' : 'Please enter a valid email address.';
     });
 
     const submitFeedback = () => {
-      // 触发一次校验（watch已更新errors）
       if (!feedbackErrors.value.name && !feedbackErrors.value.email) {
-        alert('✅ 反馈已发送！');
+        alert('✅ Feedback sent successfully!');
       } else {
-        alert('❌ 请修正红色错误。');
+        alert('❌ Please fix the red errors first.');
       }
     };
 
-    // 表单2：订阅
-    const subscribeForm = ref({ email: '', interest: '' });
+    // ----- FORM 2: Subscribe (with watch) -----
+    const subscribe = ref({ email: '', interest: '' });
     const subErrors = ref({ email: '', interest: '' });
 
-    watch(() => subscribeForm.value.email, (val) => {
+    watch(() => subscribe.value.email, (val) => {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      subErrors.value.email = re.test(val) ? '' : '请输入有效邮箱';
+      subErrors.value.email = re.test(val) ? '' : 'Please enter a valid email address.';
     });
-    watch(() => subscribeForm.value.interest, (val) => {
-      subErrors.value.interest = val.length < 1 ? '请输入感兴趣的机型' : '';
+    watch(() => subscribe.value.interest, (val) => {
+      subErrors.value.interest = val.length < 1 ? 'Please enter an interest.' : '';
     });
 
-    const subscribe = () => {
+    const submitSubscribe = () => {
       if (!subErrors.value.email && !subErrors.value.interest) {
-        alert('✅ 订阅成功！');
+        alert('✅ Subscribed successfully!');
       } else {
-        alert('❌ 请修正红色错误。');
+        alert('❌ Please fix the red errors first.');
       }
     };
 
-    // ---------- 暴露数据 ----------
+    // ----- RETURN -----
     return {
       consoles,
       keyword,
@@ -357,9 +361,9 @@ const app = createApp({
       feedback,
       feedbackErrors,
       submitFeedback,
-      subscribeForm,
+      subscribe,
       subErrors,
-      subscribe
+      submitSubscribe
     };
   }
 });
